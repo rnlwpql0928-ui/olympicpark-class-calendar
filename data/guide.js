@@ -1,4 +1,4 @@
-// 회원 먼저 — 주최가 이미 낸 안내 문구(원문 그대로)와 출처. 열람일 seen. 숫자가 든 근거는 access.js·facts.js 에서 읽는다.
+// 공연 날, 내 수업은? — 주최가 이미 낸 안내 문구(원문 그대로)와 출처. 열람일 seen. 숫자가 든 근거는 access.js·facts.js 에서 읽는다.
 window.MB_GUIDE = {
   seen: "2026-11-10",
   alarmBefore: "P1D",   // 달력 파일 알림: 하루 전

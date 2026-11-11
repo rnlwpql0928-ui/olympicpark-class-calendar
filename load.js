@@ -1,4 +1,4 @@
-/* 회원 먼저 — 달 고르기와 자료 읽기.
+/* 공연 날, 내 수업은? — 달 고르기와 자료 읽기.
  * 차례: data/months.js → data/access-<달>.js → data/facts.js → (data-main 의 app.js 또는 ops.js)
  * 달: 주소 ?m=YYYY-MM 이 목록에 있으면 그 달 → 오늘의 달이 목록에 있으면 그 달 → 목록의 마지막 달.
  * 붙이는 주소의 ?v= 꼬리표는 이 파일을 부른 <script src="load.js?v=…"> 에서 읽는다(꼬리표는 html 한 곳에만).
@@ -54,7 +54,7 @@
     if (failed) return; failed = true;
     var main = document.querySelector("main"); if (main) main.style.display = "none";   // .split·.opsmain 의 display 가 hidden 을 덮으므로 직접 숨긴다
     var box = document.createElement("div"); box.className = "nodata"; box.setAttribute("role", "alert");
-    var h = document.createElement("p"); h.className = "nodata-m"; h.textContent = L.month ? longName(L.month) : "회원 먼저"; box.appendChild(h);
+    var h = document.createElement("p"); h.className = "nodata-m"; h.textContent = L.month ? longName(L.month) : "공연 날, 내 수업은?"; box.appendChild(h);
     var p = document.createElement("p"); p.textContent = EMPTY; box.appendChild(p);
     var ok = L.months.filter(function (m) { return m !== L.month; });
     if (ok.length) {

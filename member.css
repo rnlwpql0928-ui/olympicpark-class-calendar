@@ -1,4 +1,4 @@
-/* 회원 먼저 — 수영장 파랑 한 면 + 분필 흰색 + 레인 줄 노랑. 무늬는 자료에서 온다(공연 날 13일을 레인으로). */
+/* 공연 날, 내 수업은? — 수영장 파랑 한 면 + 분필 흰색 + 레인 줄 노랑. 무늬는 자료에서 온다(공연 날 13일을 레인으로). */
 :root {
   /* 바뀌는 색(밝게·어둡게): 종이·먹·옅은 글·줄·옅은 면·눌린 자리 표시 */
   --paper: #F6F3EC;
@@ -252,7 +252,7 @@ a { color: inherit; }
   .pool { position: relative; height: auto; padding: 0 18px 16px; }
   #lanes { height: auto; aspect-ratio: 1000 / 624; flex: none; }
   .paper { padding: 28px 18px 40px; }
-  .row, .src { grid-template-columns: 1fr; gap: 10px; }
+  .row, .src { grid-template-columns: minmax(0, 1fr); gap: 10px; }   /* 1fr 만 쓰면 넓은 표가 칸을 밀어 운영 화면이 휴대폰에서 옆으로 넘친다 */
   .idx { flex-direction: row; gap: 10px; }
   .brand .sep, .brand .dim { display: none; }
   .facs { grid-template-columns: 1fr; }
@@ -350,4 +350,11 @@ a { color: inherit; }
   .otbl.cand tbody th { grid-column: 1 / -1; padding: 0 0 6px; border: 0; white-space: normal; }
   .otbl.cand tbody td { padding: 6px 0; border: 0; }
   .otbl.cand tbody td::before { content: attr(data-h); display: block; font: 600 10.5px/1.3 var(--mono); color: var(--mute); }
+}
+
+/* 아주 좁은 폭(360 안팎): 상단 이름과 달 표시가 붙어 보이지 않게 오른쪽 묶음의 사이를 줄인다 */
+@media (max-width: 380px) {
+  .tools { gap: 6px; }
+  .golink { padding: 7px 6px; }
+  .tag { letter-spacing: .04em; }
 }
