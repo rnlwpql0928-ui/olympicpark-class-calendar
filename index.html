@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>회원 먼저 — 공연 날 내 수업 달력</title>
+<meta name="description" content="올림픽공원에 큰 공연이 있는 날, 내 수업을 오가는 시간이 공연 차량이 몰리는 시간과 겹치는지 달력으로 보여 주는 화면.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231438F5'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%23FFD60A'/%3E%3C/svg%3E">
+<script src="theme.js?v=20261111j"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="member.css?v=20261111j">
+</head>
+<body>
+<main class="split">
+  <aside class="pool" id="pool">
+    <header class="top">
+      <a class="brand" href="#" id="brand"><span class="dot" aria-hidden="true"></span>회원 먼저<span class="sep" aria-hidden="true">/</span><span class="dim">공연 날 내 수업 달력</span></a>
+      <span class="tools"><span class="tag" id="monthtag"></span><a class="golink" href="ops.html">운영 화면 →</a><button type="button" class="theme" id="theme" data-dark="어둡게 보기" data-light="밝게 보기"><i aria-hidden="true"></i></button></span>
+    </header>
+    <h1 class="ask">공연 날,<br>내 수업은?</h1>
+    <svg class="wave" id="wave" viewBox="0 0 1200 24" preserveAspectRatio="xMinYMid slice" aria-hidden="true"></svg>
+    <p class="lede" id="lede"></p>
+    <svg id="lanes" viewBox="0 0 1000 624" role="img" preserveAspectRatio="xMidYMin meet"></svg>
+    <div class="lg" id="lg"></div>
+  </aside>
+
+  <section class="paper">
+    <div class="row">
+      <div class="idx"><b>01</b><span>시설</span></div>
+      <div class="body"><div class="facs" id="facs"></div></div>
+    </div>
+
+    <div class="row">
+      <div class="idx"><b>02</b><span>내 강좌</span></div>
+      <div class="body">
+        <input class="q" id="q" type="search" placeholder="강좌 이름이나 종목 — 예: 필라테스, 19시" autocomplete="off" aria-label="강좌 찾기">
+        <div class="chips" id="bands" role="group" aria-label="시간대"></div>
+        <ul class="classes" id="classes"></ul>
+        <p class="fine" id="classnote"></p>
+      </div>
+    </div>
+
+    <p class="sr" id="live" aria-live="polite"></p>
+    <div class="answer">
+      <p class="who" id="who"></p>
+      <h2 class="say" id="say"></h2>
+      <p class="saysub" id="saysub"></p>
+      <details class="more"><summary>「겹친다」는 게 뭐예요?</summary><div class="tiny" id="rule"></div></details>
+    </div>
+
+    <div class="row">
+      <div class="idx"><b>03</b><span>달력</span></div>
+      <div class="body">
+        <div class="cal" id="cal"></div>
+        <div class="days" id="days"></div>
+      </div>
+    </div>
+
+    <div class="row" id="row-todo">
+      <div class="idx"><b>04</b><span>할 일</span></div>
+      <div class="body">
+        <ol class="todo" id="todo"></ol>
+        <div class="acts">
+          <button type="button" class="btn" id="b-ics">달력에 넣기 (.ics)</button>
+          <button type="button" class="btn" id="b-copy">링크 복사</button>
+        </div>
+        <p class="fine" id="icsnote"></p>
+      </div>
+    </div>
+
+    <figure class="shot" id="shot">
+      <div class="shotbox" id="shotbox" role="button" tabindex="0" aria-pressed="false">
+        <pre id="ascii" aria-hidden="true"></pre>
+        <pre id="ascii2" aria-hidden="true"></pre>
+        <img id="shotreal" alt="">
+        <span class="shothint" id="shothint"></span>
+      </div>
+      <figcaption><span id="shotcap"></span><a class="lnk" id="shotcredit" target="_blank" rel="noopener"></a></figcaption>
+    </figure>
+
+    <div class="row" id="row-why">
+      <div class="idx"><b>05</b><span>왜</span></div>
+      <div class="body">
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+
+    <footer class="src">
+      <div class="idx"><b>—</b><span>자료</span></div>
+      <details class="more"><summary>자료 출처 보기</summary><ul id="src"></ul></details>
+    </footer>
+  </section>
+</main>
+
+<script src="data/guide.js?v=20261111j"></script>
+<script src="load.js?v=20261111j" data-main="app.js" data-empty="이 달 자료가 아직 없어요."></script>
+</body>
+</html>
