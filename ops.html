@@ -7,10 +7,10 @@
 <meta name="description" content="공연 날 회원 주차 관리를 몇 시부터 해야 하는지, 공연과 겹치는 수업 회차를 시설별로 보여 주는 직원용 화면.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231438F5'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%23FFD60A'/%3E%3C/svg%3E">
-<script src="theme.js?v=20261111k"></script>
+<script src="theme.js?v=20261111m"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="member.css?v=20261111k">
+<link rel="stylesheet" href="member.css?v=20261111m">
 </head>
 <body>
 <header class="opshead">
@@ -18,8 +18,18 @@
     <a class="brand" href="index.html"><span class="dot" aria-hidden="true"></span>내 수업 달력<span class="sep" aria-hidden="true">/</span><span class="dim">운영 화면</span></a>
     <span class="tools"><span class="tag" id="monthtag"></span><a class="golink" href="index.html">← 회원 화면</a><button type="button" class="theme" id="theme" data-dark="어둡게 보기" data-light="밝게 보기"><i aria-hidden="true"></i></button></span>
   </div>
-  <h1 class="ask">공연 날 회원 주차<br>관리 시작 시각</h1>
-  <p class="lede" id="o-lede"></p>
+  <div class="ohero">
+    <div class="ohead">
+      <h1 class="ask">공연 날 회원 주차<br>관리 시작 시각</h1>
+      <p class="sr" id="o-lede"></p>
+      <div class="kpis" id="o-kpis"></div>
+    </div>
+    <div class="ovis">
+      <div class="bill" id="o-bill" aria-label="이달 공연"></div>
+      <div class="wall" id="o-wall" data-viz role="img"></div>
+      <p class="wlg"><span><i class="wq"></i><span id="o-unit"></span></span><span><i class="wq"></i>관리 대상 도착</span><span><i class="wq h"></i>관리 시작 전 도착</span></p>
+    </div>
+  </div>
 </header>
 
 <main class="paper opsmain">
@@ -29,7 +39,8 @@
     <div class="idx"><b>01</b><span>시설</span></div>
     <div class="body">
       <div class="facs" id="facs" role="group" aria-label="시설 고르기"></div>
-      <p class="orule" id="o-rule"></p>
+      <div class="rulefig" id="o-rulefig" data-viz role="img"></div>
+      <details class="more"><summary>겹침 기준 글로 보기</summary><p class="orule" id="o-rule"></p></details>
     </div>
   </div>
 
@@ -37,27 +48,41 @@
     <div class="idx"><b>02</b><span>관리 시작 시각</span></div>
     <div class="body">
       <p class="why">관리 시작 시각을 정할 때 사용 — 후보 시각별로 그 뒤 공연 시작 전까지 도착하는 수업</p>
-      <div class="tblwrap"><table class="otbl cand" id="o-start"></table></div>
-      <p class="fine" id="o-unk"></p>
-      <p class="osum" id="o-sum"></p>
-      <p class="fine">칸 = 후보 시각 · 그 시각부터 공연 시작 전까지 도착 구간이 드는 회차 수 · 정원 합(상한) = 그 회차 강좌 정원의 합(그날 강좌마다 한 번) · 합계의 강좌 정원 합(상한) = 강좌마다 정원 한 번. 실제 온 회원 수 아님</p>
+      <div class="cands" id="o-cands" role="group" aria-label="관리 시작 후보 시각 고르기"></div>
+      <p class="pick" id="o-pick" role="status"></p>
+      <div class="arr" id="o-arr"></div>
+      <p class="chips0" id="o-arrzero"></p>
+      <details class="more"><summary>표로 보기 · 세는 법</summary>
+        <div>
+          <div class="tblwrap"><table class="otbl cand" id="o-start"></table></div>
+          <p class="fine" id="o-unk"></p>
+          <p class="osum" id="o-sum"></p>
+          <p class="fine">칸 = 후보 시각 · 그 시각부터 공연 시작 전까지 도착 구간이 드는 회차 수 · 정원 합(상한) = 그 회차 강좌 정원의 합(그날 강좌마다 한 번) · 합계의 강좌 정원 합(상한) = 강좌마다 정원 한 번. 실제 온 회원 수 아님</p>
+        </div>
+      </details>
     </div>
   </div>
 
   <div class="row">
     <div class="idx"><b>03</b><span>공연별 시간 띠</span></div>
     <div class="body">
-      <p class="why">노란 띠 = 입장·퇴장 몰림 시간 · 세로선 = 공연 시작 · 막대 = 겹치는 수업의 시작 시각(높을수록 회차 많음) · 빈 막대 = 마중 섞임</p>
+      <p class="lgd"><span><i class="lb"></i>입장·퇴장 몰림</span><span><i class="ll"></i>공연 시작</span><span><i class="lt"></i>겹치는 수업(높이 = 정원 합)</span><span><i class="lt m"></i>마중 섞임</span></p>
       <div class="strips" id="o-strips"></div>
-      <ul class="szero" id="o-zero" aria-label="겹치는 수업이 없는 공연 날"></ul>
+      <p class="chips0" id="o-zero" aria-label="겹치는 수업이 없는 공연 날"></p>
     </div>
   </div>
 
   <div class="row">
     <div class="idx"><b>04</b><span>강습반별</span></div>
     <div class="body">
-      <div class="tblwrap"><table class="otbl" id="o-groups"></table></div>
-      <p class="fine" id="o-groupnote"></p>
+      <div class="gbars" id="o-gbars"></div>
+      <p class="chips0" id="o-gzero"></p>
+      <details class="more"><summary>표로 보기</summary>
+        <div>
+          <div class="tblwrap"><table class="otbl" id="o-groups"></table></div>
+          <p class="fine" id="o-groupnote"></p>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -74,22 +99,27 @@
   <div class="row">
     <div class="idx"><b>06</b><span>달력 맞대기</span></div>
     <div class="body">
-      <p class="why" id="o-calsum"></p>
-      <div class="tblwrap"><table class="otbl" id="o-cal"></table></div>
-      <p class="fine" id="o-calnote"></p>
+      <div class="caldays" id="o-caldays" data-viz role="img" aria-label="공연 날별 맞대기 결과. 자세한 값은 아래 표"></div>
+      <ul class="calbad" id="o-calbad" aria-label="어긋난 날"></ul>
+      <p class="fine" id="o-calsum"></p>
+      <details class="more"><summary>표로 보기</summary>
+        <div>
+          <div class="tblwrap"><table class="otbl" id="o-cal"></table></div>
+          <p class="fine" id="o-calnote"></p>
+        </div>
+      </details>
     </div>
   </div>
 
   <footer class="src">
     <div class="idx"><b>—</b><span>자료</span></div>
     <div>
-      <details class="more"><summary>자료 출처 보기</summary><ul id="o-src"></ul></details>
-      <p class="fine" id="o-self"></p>
+      <details class="more"><summary>자료 출처 · 자체 점검 보기</summary><ul id="o-src"></ul></details>
     </div>
   </footer>
 </main>
 
-<script src="data/guide.js?v=20261111k"></script>
-<script src="load.js?v=20261111k" data-main="ops.js" data-empty="해당 달 자료 없음"></script>
+<script src="data/guide.js?v=20261111m"></script>
+<script src="load.js?v=20261111m" data-main="ops.js" data-empty="해당 달 자료 없음"></script>
 </body>
 </html>
