@@ -470,6 +470,10 @@ a { color: inherit; }
 .lgd .ll { width: 2px; height: 12px; background: var(--ink); }
 .lgd .lt { width: 7px; height: 12px; background: var(--ink); border-radius: 3px 3px 0 0; }
 .lgd .lt.m { background: none; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lgd .sqf, .lgd .sqh { width: 9px; height: 9px; vertical-align: -1px; }
+.lgd .sqf { background: var(--rope); box-shadow: inset 0 0 0 1px #0b0f2b47; }
+.lgd .sqh { box-shadow: inset 0 0 0 1.2px var(--mute); }
+.cnote { margin: 8px 0 0; }
 .sshow h3 { font-size: clamp(20px, 2.3vw, 30px); font-weight: 800; letter-spacing: -.045em; line-height: 1.1; }
 .sshow h3 small { font: 600 12px/1 var(--mono); letter-spacing: 0; color: var(--mute); margin-left: 8px; }
 .swin b { color: var(--ink); font-weight: 700; }

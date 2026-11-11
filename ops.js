@@ -239,22 +239,24 @@
 
   // 이달 공연 이름(큰 글자)과 한 달 벽: 날마다 네모 쌓기(고른 후보의 관리 대상 = 채운 네모, 그 전에 도착 = 빈 네모)
   function renderWall() {
-    var res = R[S.fac.name], i = ki(), bill = $("o-bill"), wall = $("o-wall"); bill.textContent = ""; wall.textContent = "";
+    var res = R[S.fac.name], bill = $("o-bill"), wall = $("o-wall"); bill.textContent = ""; wall.textContent = "";
+    // 날마다 채운 네모·빈 네모를 도착 줄과 같은 식으로 센다(b.arr 의 칸마다 covered). 벽과 줄의 숫자가 늘 같다.
+    res.shows.forEach(function (b) { var o = b._p = { lit: 0, n: 0, lost: 0 }; b.arr.forEach(function (c) { if (covered(c, b.start, S.k)) { o.lit += c.cap; o.n += c.n; } else o.lost += c.cap; }); });
     var groups = [];
     res.shows.forEach(function (b) { var n = nm(b.show), g = groups[groups.length - 1]; if (!g || g.name !== n) { g = { name: n, title: b.show.title, days: [] }; groups.push(g); } g.days.push(b); });
-    var best = 0; res.shows.forEach(function (b) { if (b.cand[i].cap > best) best = b.cand[i].cap; });
+    var best = 0; res.shows.forEach(function (b) { if (b._p.lit > best) best = b._p.lit; });
     groups.forEach(function (g) {
-      var on = g.days.some(function (b) { return b.cand[i].cap > 0; }), top = best > 0 && g.days.some(function (b) { return b.cand[i].cap === best; });
+      var on = g.days.some(function (b) { return b._p.lit > 0; }), top = best > 0 && g.days.some(function (b) { return b._p.lit === best; });
       var sp = el("span", "bn" + (on ? " on" : "") + (top ? " peak" : "")); sp.appendChild(el("b", null, g.name)); sp.title = g.title;
       sp.appendChild(el("small", null, md(g.days[0].show) + (g.days.length > 1 ? "–" + (+dd(g.days[g.days.length - 1].show)) : "")));
       bill.appendChild(sp);
     });
-    var labeled = res.shows.map(function (b) { return b.cand[i].cap; }).filter(function (v) { return v > 0; }).sort(function (p, q) { return q - p; })[3] || 0;   // 값 큰 네 칸에만 숫자
+    var labeled = res.shows.map(function (b) { return b._p.lit; }).filter(function (v) { return v > 0; }).sort(function (p, q) { return q - p; })[3] || 0;   // 값 큰 네 칸에만 숫자
     groups.forEach(function (g) {
       var gw = el("div", "wg");
       g.days.forEach(function (b) {
-        var lit = b.cand[i].cap, lost = b.cand[0].cap - lit, c = el("div", "wc" + (lit + lost ? "" : " zero") + (best > 0 && lit === best ? " peak" : ""));
-        tipOf(c, md(b.show) + " " + b.show.dow + " " + b.show.start + " " + nm(b.show) + " — 관리 대상 도착 " + num(b.cand[i].n) + "회 · 정원 합 " + num(lit) + "명" + (lost ? " / 그 전 도착 " + num(lost) + "명" : ""));
+        var lit = b._p.lit, lost = b._p.lost, c = el("div", "wc" + (lit + lost ? "" : " zero") + (best > 0 && lit === best ? " peak" : ""));
+        tipOf(c, md(b.show) + " " + b.show.dow + " " + b.show.start + " " + nm(b.show) + " — 관리 대상 도착 " + num(b._p.n) + "회 · 정원 합 " + num(lit) + "명" + (lost ? " / 그 전 도착 " + num(lost) + "명" : ""));
         if (lit >= labeled && lit > 0) c.appendChild(el("span", "wn", num(lit)));
         if (lost) c.appendChild(stk(lost, "h"));
         if (lit) c.appendChild(stk(lit));
@@ -281,14 +283,14 @@
       var b = el("button", "ctile" + (o.k === D.rule.entry ? " now" : "")); b.type = "button"; b.setAttribute("aria-pressed", String(o.k === S.k));
       var ck = el("span", "ck"); ck.appendChild(el("span", "pre", "공연 ")); ck.appendChild(document.createTextNode(o.k + "분 전")); b.appendChild(ck); if (o.k === D.rule.entry) b.appendChild(el("em", "cnow", "지금 규칙"));
       var v = el("b", "cv", num(o.cap)); v.appendChild(el("small", null, "명")); b.appendChild(v);
-      b.appendChild(el("span", "cs", num(o.n) + "회" + (unk ? " · 종목 제외 " + num(o.rest) + "회" : "")));
+      b.appendChild(el("span", "cs", num(o.n) + "회 · 달 합" + (unk ? " · 종목 제외 " + num(o.rest) + "회" : "")));
       var m = el("i", "cm"); m.style.setProperty("--v", maxCap ? (o.cap / maxCap * 100).toFixed(1) + "%" : "0%"); b.appendChild(m);
       b.onclick = function () { S.k = o.k; renderStart(); renderWall(); var nb = $("o-cands").querySelector('[aria-pressed="true"]'); if (nb) nb.focus(); };   // 다시 그린 뒤에도 초점을 고른 칸에 둔다
       box.appendChild(b);
     });
     var cur = tots[i], nxt = tots[i + 1], pick = $("o-pick"); pick.textContent = "";
     pick.appendChild(el("b", null, "공연 " + cur.k + "분 전 시작"));
-    pick.appendChild(document.createTextNode(" — 관리 대상 도착 " + num(cur.n) + "회 · 정원 합 " + num(cur.cap) + "명" +
+    pick.appendChild(document.createTextNode(" — 관리 대상 도착 " + num(cur.n) + "회 · 정원 합 " + num(cur.cap) + "명(달 합)" +
       (nxt ? (nxt.cap === cur.cap ? " / " + nxt.k + "분 전으로 늦춰도 동일" : " / " + nxt.k + "분 전으로 늦추면 " + num(cur.n - nxt.n) + "회 · " + num(cur.cap - nxt.cap) + "명 관리 시작 전 도착") : "")));
 
     var rows = $("o-arr"), zero = $("o-arrzero"); rows.textContent = ""; zero.textContent = "";
@@ -524,7 +526,9 @@
   function renderMonth() {   // 머리의 달 표시와 달 단추는 load.js 몫(없으면 달 이름만)
     var LD = root.MB_LOAD; if (LD && LD.month === D.month) LD.mount($("monthtag")); else $("monthtag").textContent = YY + " · " + pad(MM);
     $("o-groupnote").textContent = "반 구분은 강좌정보 자료 기준. 겹치는 강좌 = " + MM + "월 겹치는 회차가 하나 이상인 강좌";
-    $("o-unit").textContent = "네모 하나 = 정원 " + UNIT + "명(상한 · 실제 온 회원 수 아님)";
+    $("o-unit").textContent = $("o-unit2").textContent = "네모 하나 = 정원 " + UNIT + "명(상한 · 실제 온 회원 수 아님)";
+    $("o-unit4").textContent = "네모 하나 = 정원 " + UNIT + "명";
+    $("o-candnote").textContent = "큰 숫자 = 달 합(공연 날마다 더한 정원 합 · 같은 강좌는 날마다 다시 더함)";
   }
   $("o-copy").onclick = copyNotice;
   window.addEventListener("hashchange", render);
