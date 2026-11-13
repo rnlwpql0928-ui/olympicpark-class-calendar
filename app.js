@@ -321,9 +321,13 @@
     var box = $("stats"), t = TALLY[S.fac.name], fr = F.friday, p4 = F.p4, pool = G.fac["올림픽수영장"], r = D.rule; box.textContent = "";
     function tile(v, text, link) { var d = el("div"); d.appendChild(el("b", null, v)); var sp = el("span", null, text); if (link) { sp.appendChild(document.createTextNode(" ")); var a = el("a", "lnk", link[0] + " ↗"); a.href = link[1]; a.target = "_blank"; a.rel = "noopener"; sp.appendChild(a); } d.appendChild(sp); box.appendChild(d); }
     tile(G.voc.n + "건", "공연·행사 날 주차가 불편했다는 회원 글. " + G.voc.label + ", " + G.voc.from + " ~ " + G.voc.to + ".", ["그중 한 글과 주최 답변", G.voc.url]);
-    tile(p4.eventFull + " / " + p4.eventDays + "일", "공원에 행사가 있던 날, 수영장 옆 " + pool.near + "(" + pool.nearCap + "대)가 만차로 적힌 날. 행사 없던 날은 " + p4.quietFull + " / " + p4.quietDays + "일. 직원 기록 " + p4.from + " ~ " + p4.to + ".");
+    // 만차 기록은 요일을 가리지 않고 센다. 「행사 있던 날 대 없던 날」 대비는 쓰지 않는다(기록이 있는 주말은 모두 행사 날이라 공연의 몫을 가를 수 없음, 초안 2-2 요일 표)
+    tile((p4.eventFull + p4.quietFull) + " / " + p4.logDays + "일", "수영장 옆 " + pool.near + "(" + pool.nearCap + "대)가 만차로 적힌 날 / 직원 기록이 있는 날. 기록 " + p4.from + " ~ " + p4.to + ". 만차 기록은 대부분 토·일요일 낮이라, 금요일 저녁 공연의 몫을 이 기록으로 가를 수는 없음.");
     var usual = median(fr.usual.map(function (u) { return u.entries; }));
-    tile((fr.show.entries / usual).toFixed(1) + "배", "공연 금요일 " + fr.show.window + "에 들어온 차 " + num(fr.show.entries) + "대. 평소 금요일은 " + num(usual) + "대(세 번의 가운데 값). 그 차의 " + fr.show.lt10pct + "%는 10분 안에 나감.");
+    // 10분 넘게 머문 차만 센 배수와 평소 금요일의 10분 미만 비중을 함께 적는다(짧게 머문 차가 섞인 1.6배만 보이지 않게)
+    function stay(u) { return u.entries * (1 - u.lt10pct / 100); }
+    var usualPct = fr.usual.map(function (u) { return u.lt10pct; }), stayX = stay(fr.show) / median(fr.usual.map(stay));
+    tile((fr.show.entries / usual).toFixed(1) + "배", "공연 금요일 " + fr.show.window + "에 들어온 차 " + num(fr.show.entries) + "대. 평소 금요일은 " + num(usual) + "대(세 번의 가운데 값). 그 차의 " + fr.show.lt10pct + "%는 10분 안에 나감(평소 금요일은 " + Math.min.apply(null, usualPct) + "~" + Math.max.apply(null, usualPct) + "%). 10분 넘게 머문 차만 세면 약 " + stayX.toFixed(2) + "배.");
     tile(num(t.sessions) + "회", MM + "월 " + S.fac.name + " 수업 가운데 공연과 겹치는 횟수. 강좌 " + num(t.nClasses) + "개 · 강좌 정원 합 " + num(t.classCap) + "명(상한).");
     // 접어 둔 뜻풀이: 무엇을 「겹친다」고 세었는지, 그리고 그 말이 뜻하지 않는 것
     var rule = $("rule"); rule.textContent = "";
