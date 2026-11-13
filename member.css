@@ -529,3 +529,10 @@ a { color: inherit; }
   .ctile .pre { display: none; }
   .cd { width: 38px; }
 }
+
+/* 휴대폰 강좌 줄(2026-11-13 검수): 이름이 한 줄에서 잘려 같은 시각 강좌가 구별되지 않던 것을 두 줄까지 보이게 한다 */
+@media (max-width: 560px) {
+  .classes button { grid-template-columns: 86px minmax(0, 1fr) auto; gap: 8px; }
+  .classes .n { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.3; }
+  .classes .n small { display: block; margin: 3px 0 0; }
+}
