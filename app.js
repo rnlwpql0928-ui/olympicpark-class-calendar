@@ -98,37 +98,65 @@
   }
 
   // ---------- 왼쪽: 레인 ----------
-  var X0 = 104, X1 = 986, T0 = 360, T1 = 1440, TOP = 34, LH = 45, LANEKEY = null;
+  // 그림 틀(20261127): 넓은 화면은 1000 폭 그대로. 그림이 560px 보다 좁게 놓이면(휴대폰) 460 폭으로 그려 글자가 실제 10px 이상이 되게 한다.
+  // 높이는 공연 날 수만큼 늘어난다(12월처럼 날이 많아도 아래가 잘리지 않게). 레인 한 줄은 휴대폰 44 · 중간 폭 50(위쪽에 시작 시각 글자 자리), PC 는 남는 높이에 맞춰 40~84.
+  var X0 = 104, X1 = 986, T0 = 360, T1 = 1440, TOP = 34, LH = 50, LW = 1000, NARROW = false, LANEKEY = null, LSTRIP = 0;
   function x(m) { return X0 + (Math.max(T0, Math.min(T1, m)) - T0) / (T1 - T0) * (X1 - X0); }
+  function laneWidth() { var g = $("lanes"), r = g && g.getBoundingClientRect ? g.getBoundingClientRect() : null; return r ? r.width : 0; }
+  function laneScale(g) {   // 그림이 실제로 줄어든 비율 → 글자 크기 계산에 쓰는 --k (member.css #lanes)
+    var r = g.getBoundingClientRect ? g.getBoundingClientRect() : null, vb = g.viewBox && g.viewBox.baseVal;
+    if (r && r.width > 0 && vb && vb.width) g.style.setProperty("--k", Math.min(r.width / vb.width, r.height > 0 ? r.height / vb.height : 9).toFixed(3));
+  }
+  // 넓은 화면(왼쪽 파랑 면이 화면 높이에 붙어 있음)에서는 레인 높이를 남는 높이에 맞춰 늘린다 — 그림 아래 파란 빈 띠가 남지 않게. 레인 하나는 40~84 사이
+  function laneFill(g) {
+    var desk = !!(window.matchMedia && window.matchMedia("(min-width: 981px)").matches), r = g.getBoundingClientRect ? g.getBoundingClientRect() : null;
+    if (!desk || NARROW || !r || !(r.width > 0) || !(r.height > 0)) return 0;
+    return Math.max(40, Math.min(84, (r.height / (r.width / LW) - TOP - 5) / D.shows.length));
+  }
+  function laneGeo(g) {
+    var w = laneWidth(); NARROW = w > 0 && w < 560;
+    LW = NARROW ? 460 : 1000; X0 = NARROW ? 58 : 104; X1 = NARROW ? 450 : 986; TOP = NARROW ? 30 : 34; LH = NARROW ? 44 : 50;   // 레인마다 띠 위에 시작 시각 글자 자리가 있다(renderLanes)
+    var fill = laneFill(g); if (fill) LH = Math.round(fill * 10) / 10;
+    g.setAttribute("viewBox", "0 0 " + LW + " " + Math.round(TOP + LH * D.shows.length + 5));
+    if (g.classList) g.classList.toggle("narrow", NARROW);
+    laneScale(g);
+  }
   function renderLanes() {
-    var g = $("lanes"), r = D.rule, t = TALLY[S.fac.name]; g.textContent = "";
+    var g = $("lanes"), r = D.rule, t = TALLY[S.fac.name]; g.textContent = ""; laneGeo(g);
     var key = slugOf(S.fac) + "|" + (S.cls ? S.cls.id : ""); g.classList.toggle("fresh", key !== LANEKEY); LANEKEY = key;   // 시설·강좌가 바뀔 때만 점이 다시 떠오른다
+    // 레인 안의 자리는 가운데(mid)에서 잰다: 띠 높이는 레인이 커져도 34 를 넘지 않는다(레인 45 이면 예전 자리와 같다)
+    // 레인 한 줄 = 위쪽 시작 시각 글자 자리(strip) + 띠. 글자 자리는 실제 글자 크기(member.css #lanes .st 와 같은 식)에 맞춘다 — 시작 시각 글자가 노란 점을 가리지 않게(20261127b)
+    var k = parseFloat(g.style.getPropertyValue("--k")) || 1, fu = Math.max(12, Math.min(19, 10.5 / k)), cap = fu * 0.72, strip = Math.round(cap + 7); LSTRIP = strip;
+    var free = LH - strip, bh = Math.max(10, Math.min(free - 6, 34)), bandY = strip + (free - bh) / 2, dayY = bandY + bh / 2 + 7.5;
     for (var h = 6; h <= 24; h += 3) {
       g.appendChild(svg("line", { x1: x(h * 60), x2: x(h * 60), y1: TOP, y2: TOP + LH * D.shows.length, class: "grid" }));
-      var tx = svg("text", { x: x(h * 60), y: 20, class: "ax" }); tx.textContent = pad(h); g.appendChild(tx);
+      var tx = svg("text", { x: x(h * 60), y: TOP - 14, class: "ax" }); tx.textContent = pad(h); g.appendChild(tx);
     }
     D.shows.forEach(function (s, i) {
-      var day = dd(s), y0 = TOP + i * LH, mid = y0 + LH / 2, st = toMin(s.start), b = t.byDay[day];
+      var day = dd(s), y0 = TOP + i * LH, mid = y0 + bandY + bh / 2, st = toMin(s.start), b = t.byDay[day];
       var code = S.cls ? S.cls.days[day] : undefined, lane = svg("g", { class: "lane" + (S.cls && code === undefined ? " off" : "") + (S.day === day ? " sel" : "") });
       lane.style.setProperty("--i", i);
-      lane.appendChild(svg("rect", { x: 0, y: y0, width: 1000, height: LH, class: "hitbox" }));
+      lane.appendChild(svg("rect", { x: 0, y: y0, width: LW, height: LH, class: "hitbox" }));
       lane.appendChild(svg("line", { x1: X0, x2: X1, y1: y0, y2: y0, class: "rope" }));
-      var d1 = svg("text", { x: 6, y: y0 + 30, class: "day" }); d1.textContent = +day; lane.appendChild(d1);
-      var d2 = svg("text", { x: 46, y: y0 + 29, class: "dow" }); d2.textContent = s.dow; lane.appendChild(d2);
-      lane.appendChild(svg("rect", { x: x(st - r.entry), y: y0 + 8, width: x(st) - x(st - r.entry), height: LH - 16, class: "band" }));
-      lane.appendChild(svg("rect", { x: x(st + r.exit0), y: y0 + 8, width: x(st + r.exit1) - x(st + r.exit0), height: LH - 16, class: "band" }));
-      lane.appendChild(svg("line", { x1: x(st), x2: x(st), y1: y0 + 5, y2: y0 + LH - 5, class: "start" }));
-      var t2 = svg("text", { x: x(st) + 6, y: y0 + 17, class: "st" }); t2.textContent = s.start; lane.appendChild(t2);
+      var d1 = svg("text", { x: NARROW ? 4 : 6, y: y0 + dayY, class: "day" }); d1.textContent = +day; lane.appendChild(d1);
+      var d2 = svg("text", { x: NARROW ? 32 : 46, y: y0 + dayY - 1, class: "dow" }); d2.textContent = s.dow; lane.appendChild(d2);
+      lane.appendChild(svg("rect", { x: x(st - r.entry), y: y0 + bandY, width: x(st) - x(st - r.entry), height: bh, class: "band" }));
+      lane.appendChild(svg("rect", { x: x(st + r.exit0), y: y0 + bandY, width: x(st + r.exit1) - x(st + r.exit0), height: bh, class: "band" }));
+      lane.appendChild(svg("line", { x1: x(st), x2: x(st), y1: y0 + bandY - 4 - cap, y2: y0 + bandY + bh + 3, class: "start" }));
+      // 시작 시각 글자는 띠 바로 위, 시작 선 꼭대기 옆(깃발처럼). 점·수업 막대와 겹치지 않는다. 글 순서는 예전과 같다(날·요일·시각·합계)
+      var t2 = svg("text", { x: x(st) + 5, y: y0 + bandY - 4, class: "st" }); t2.textContent = s.start;
       if (!S.cls) {
         Object.keys(b.secStarts).forEach(function (m) { lane.appendChild(svg("circle", { cx: x(+m), cy: mid, r: (2.5 + Math.sqrt(b.secStarts[m]) * 1.7).toFixed(1), class: "agg2" })); });
         Object.keys(b.starts).forEach(function (m) { lane.appendChild(svg("circle", { cx: x(+m), cy: mid, r: (2.5 + Math.sqrt(b.starts[m]) * 1.7).toFixed(1), class: "agg" })); });
-        if (b.n) { var tt = svg("text", { x: 998, y: y0 + 30, class: "tot" }); tt.textContent = b.n; lane.appendChild(tt); }
+        lane.appendChild(t2);
+        if (b.n) { var tt = svg("text", { x: LW - 2, y: y0 + dayY, class: "tot" }); tt.textContent = b.n; lane.appendChild(tt); }
       } else if (code !== undefined) {
         var sp = span(S.cls);
         lane.appendChild(svg("line", { x1: x(sp[0] - r.arrive), x2: x(sp[0]), y1: mid, y2: mid, class: "wh" + (code & 1 ? " hit" : "") }));
         lane.appendChild(svg("line", { x1: x(sp[1]), x2: x(sp[1] + r.leave), y1: mid, y2: mid, class: "wh" + (code & 6 ? " hit" : "") }));
         lane.appendChild(svg("rect", { x: x(sp[0]), y: mid - 8, width: Math.max(6, x(sp[1]) - x(sp[0])), height: 16, rx: 8, class: "cls" + (prim(code) ? " hit" : secOnly(code) ? " meet" : "") }));
-      }
+        lane.appendChild(t2);
+      } else lane.appendChild(t2);
       var ti = svg("title", {}); ti.textContent = md(s) + " " + s.dow + " · " + s.title + " " + s.start; lane.appendChild(ti);
       lane.addEventListener("click", function () { go({ day: S.day === day ? null : day }); jump(day); });
       g.appendChild(lane);
@@ -152,7 +180,7 @@
     var box = $("facs"); box.textContent = "";
     D.facilities.forEach(function (f) {
       var t = TALLY[f.name], b = el("button", null, f.name); b.type = "button"; b.setAttribute("aria-pressed", String(f === S.fac));
-      b.appendChild(el("small", null, MM + "월 겹치는 수업 " + num(t.sessions) + "회 · 강좌 " + num(t.nClasses) + "개"));
+      var sm = el("small"); sm.appendChild(el("span", null, MM + "월 겹치는 수업 " + num(t.sessions) + "회")); sm.appendChild(document.createTextNode(" · ")); sm.appendChild(el("span", null, "강좌 " + num(t.nClasses) + "개")); b.appendChild(sm);   // 글은 그대로, 두 덩어리로만 나눈다(줄이 넘치면 덩어리째 넘어간다)
       b.onclick = function () { S.q = ""; $("q").value = ""; go({ fac: f, cls: null, day: null }); }; box.appendChild(b);
     });
   }
@@ -250,7 +278,7 @@
     function card(s, fillBody) {
       var day = dd(s), c = el("div", "dcard" + (S.day === day ? " sel" : "")); c.dataset.day = day;
       var dt = el("div", "dt", md(s)); dt.appendChild(el("small", null, s.dow + "요일")); c.appendChild(dt);
-      var body = el("div"); body.appendChild(el("h3", null, s.title + " · " + s.start + " 시작")); fillBody(body); c.appendChild(body); box.appendChild(c);
+      var body = el("div"), h3 = el("h3", null, s.title); h3.appendChild(el("span", "nw", " · " + s.start + " 시작")); body.appendChild(h3); fillBody(body); c.appendChild(body); box.appendChild(c);   // 「· 19:00 시작」은 한 덩어리(글은 그대로)
     }
     if (S.cls) {
       var H = hitDays(S.cls);
@@ -421,6 +449,13 @@
   });
   $("b-ics").onclick = saveIcs; $("b-copy").onclick = copyLink;
   window.addEventListener("hashchange", render);
+  // 폭이 바뀌어 그림 틀(넓은 1000 / 좁은 460)이 달라져야 할 때만 레인을 다시 그린다
+  var lrz = 0; window.addEventListener("resize", function () { cancelAnimationFrame(lrz); lrz = requestAnimationFrame(function () {
+    var g = $("lanes"), w = laneWidth(), n = w > 0 && w < 560, f = n === NARROW ? laneFill(g) : 0;
+    if (n !== NARROW || (f && Math.abs(f - LH) > 0.6) || (!f && !NARROW && LH !== 50)) { renderLanes(); return; }
+    laneScale(g);   // 글자 크기가 바뀌어 시작 시각 글자 자리(LSTRIP)가 달라지면 다시 그린다
+    var k2 = parseFloat(g.style.getPropertyValue("--k")) || 1; if (Math.round(Math.max(12, Math.min(19, 10.5 / k2)) * 0.72 + 7) !== LSTRIP) renderLanes();
+  }); });
   window.MB_APP = { state: S, tally: TALLY, hitDays: hitDays, sentences: sentences, go: go };
   renderMonth(); render(); initWater(); initPhoto();
   watch($("shot")); watch($("row-why")); watch($("row-todo"));

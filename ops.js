@@ -247,7 +247,7 @@
     var best = 0; res.shows.forEach(function (b) { if (b._p.lit > best) best = b._p.lit; });
     groups.forEach(function (g) {
       var on = g.days.some(function (b) { return b._p.lit > 0; }), top = best > 0 && g.days.some(function (b) { return b._p.lit === best; });
-      var sp = el("span", "bn" + (on ? " on" : "") + (top ? " peak" : "")); sp.appendChild(el("b", null, g.name)); sp.title = g.title;
+      var sp = el("span", "bn" + (on ? " on" : "") + (top ? " peak" : "") + (g.name.length > 14 ? " long" : "")); sp.appendChild(el("b", null, g.name)); sp.title = g.title;   // 짧은 이름을 못 만든 긴 제목은 작은 글자로(member.css .bn.long)
       sp.appendChild(el("small", null, md(g.days[0].show) + (g.days.length > 1 ? "–" + (+dd(g.days[g.days.length - 1].show)) : "")));
       bill.appendChild(sp);
     });
